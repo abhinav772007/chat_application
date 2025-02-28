@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ room_name }} - DjChat</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="static/images/favicon.png">
+    
+    <!-- jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+    
+ /* Make body take full screen */
+/* Full-screen layout */
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Lato', sans-serif;
+    background: linear-gradient(to bottom, #d9f1ff, #ffffff); /* Light Blue Gradient */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+h2 {
+    text-align: center;
+    color: #fff;
+    padding: 15px;
+    background: #4a90e2;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Chat Container */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: calc(100vh - 60px); /* Full height minus header */
+    width: 90%;
+    max-width: 1000px; /* Fixed width */
+    padding: 20px;
+}
+
+/* Message Display Box */
+#display {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    max-height: 65vh; /* Limits message container height */
+}
+
+/* Chat Messages */
+.container {
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    position: relative;
+    max-width: 80%;
+    word-wrap: break-word; /* Ensures long messages wrap */
+}
+
+.darker {
+    background: #4a90e2;
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+/* Chat Input */
+.chat-form {
+    width: 100%;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Input Field */
+input[type="text"] {
+    flex: 1;
+    min-height: 40px;
+    max-height: 150px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 18px;
+    height: auto; /* Prevent manual resizing */
+    overflow-y: auto; /* Scroll when needed */
+}
+
+/* Send Button */
+input[type="submit"] {
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.3s;
+    align-items: left
+    ;
+}
+
+input[type="submit"]:hover {
+    background: #357abd;
+}
+.intro{
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+    color: #4a90e2;}
+
+
+</style>
+</head>
+
+<body>
+
+<h2> Room - {{ room_name }}  💬</h2>
+
+<!-- Chat Display -->
+ <div class="intro">
+    WELCOME TO THE CHAT ROOM-{{ room_name }}
+ </div>
+
+<div id="display">
+    
+   
+    <div class="container darker">
+        <b>{{ username }}</b>
+        <p>Say Hello to {{username}}</p>
+        <span class="time-left">{{ time }}</span>
+    </div>
+</div>
+
+<!-- Chat Sending Form -->
+<div class="chat-form">
+    <form id="post-form">
+        {% csrf_token %}
+        <input type="hidden" name="username" id="username" value="{{ username }}" />
+        <input type="hidden" name="room_id" id="room_id" value="{{ room_details.id }}" />
+        <input type="text" name="message" id="message" placeholder="Type your message..." />
+        <input type="submit" value="Send">
+    </form>
+ 
+    
+</div>
+
+&copy; Abhinav Shivanadri
+
+<!-- AJAX Chat Update Script -->
+<script>
+$(document).ready(function(){
+    setInterval(function(){
+        $.ajax({
+            type: 'GET',
+            url : "/getMessages/{{ room_name }}/",
+            success: function(response){
+                $("#display").empty();
+                for (var key in response.messages)
+                {
+                    var temp = "<div class='container darker'><b>" + response.messages[key].user + "</b><p>" + response.messages[key].value + "</p><span class='time-left'>" + response.messages[key].date + "</span></div>";
+                    $("#display").append(temp);
+                }
+            },
+            error: function(response){
+                alert('An error occurred');
+            }
+        });
+    }, 1000);
+});
+</script>
+
+<!-- AJAX Form Submission -->
+<script>
+$(document).on('submit','#post-form',function(e){
+    e.preventDefault();
+
+    $.ajax({
+        type:'POST',
+        url:'/send',
+        data:{
+            username:$('#username').val(),
+            roomname:$('#room_id').val(),
+            message:$('#message').val(),
+            csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        },
+        success: function(data){
+            $('#message').val('');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

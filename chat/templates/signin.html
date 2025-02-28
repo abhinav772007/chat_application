@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    hello world
+    <form method="POST"">
+        {% csrf_token %}
+    <label for="username">Username</label>
+    <input type="text" name="username" id="username" class="input-box" required>
+
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" class="input-box" required>
+
+    <button type="submit" class="btn">Sign In</button>
+    {% for message in messages %}   
+    <h3>{{message}}</h3>
+    {% endfor %}
+
+    
+    </form>
+</body>
+</html>
